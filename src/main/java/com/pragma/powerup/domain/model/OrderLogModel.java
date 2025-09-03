@@ -5,7 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class OrderLogModel {
     private Long orderId;
-    private String previousState;
-    private String newState;
-    private LocalDateTime changedAt;
+    private Long chefId;
+    private Long customerId;
+    private List<OrderStatusModel> statusChanges = new ArrayList<>();
 }

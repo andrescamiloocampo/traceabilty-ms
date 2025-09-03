@@ -11,6 +11,7 @@ import com.pragma.powerup.infrastructure.out.jpa.mapper.IObjectEntityMapper;
 import com.pragma.powerup.infrastructure.out.jpa.repository.IObjectRepository;
 import com.pragma.powerup.infrastructure.out.mongo.adapter.OrderLogMongoAdapter;
 import com.pragma.powerup.infrastructure.out.mongo.mapper.IOrderLogDocumentMapper;
+import com.pragma.powerup.infrastructure.out.mongo.mapper.IOrderStatusDocumentMapper;
 import com.pragma.powerup.infrastructure.out.mongo.repository.IOrderLogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -23,6 +24,7 @@ public class BeanConfiguration {
     private final IObjectEntityMapper objectEntityMapper;
     private final IOrderLogRepository orderLogRepository;
     private final IOrderLogDocumentMapper orderLogDocumentMapper;
+    private final IOrderStatusDocumentMapper orderStatusDocumentMapper;
 
     @Bean
     public IObjectPersistencePort objectPersistencePort() {
@@ -36,7 +38,7 @@ public class BeanConfiguration {
 
     @Bean
     public IOrderLogPersistencePort orderLogPersistencePort() {
-        return new OrderLogMongoAdapter(orderLogRepository,orderLogDocumentMapper);
+        return new OrderLogMongoAdapter(orderLogRepository,orderLogDocumentMapper,orderStatusDocumentMapper);
     }
 
     @Bean

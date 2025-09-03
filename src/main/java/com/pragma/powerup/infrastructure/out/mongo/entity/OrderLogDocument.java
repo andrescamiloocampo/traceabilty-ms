@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,7 +16,8 @@ import java.time.LocalDateTime;
 public class OrderLogDocument {
     private String id;
     private Long orderId;
-    private String previousState;
-    private String newState;
-    private LocalDateTime changedAt;
+    private Long chefId;
+    private Long customerId;
+
+    private List<OrderStatus> statusChanges;
 }

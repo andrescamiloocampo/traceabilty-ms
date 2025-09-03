@@ -2,6 +2,7 @@ package com.pragma.powerup.domain.usecase;
 
 import com.pragma.powerup.domain.api.IOrderLogServicePort;
 import com.pragma.powerup.domain.model.OrderLogModel;
+import com.pragma.powerup.domain.model.OrderStatusModel;
 import com.pragma.powerup.domain.spi.IOrderLogPersistencePort;
 
 import java.time.LocalDateTime;
@@ -16,13 +17,19 @@ public class OrderLogUseCase implements IOrderLogServicePort {
     }
 
     @Override
-    public void logOrderStatusChange(Long orderId, String status,String previousStatus) {
-        OrderLogModel orderLogModel = new OrderLogModel(orderId,previousStatus,status, LocalDateTime.now());
-        orderLogPersistencePort.logOrderStatusChange(orderLogModel);
+    public void logOrderStatusChange(OrderLogModel orderLogModel) {
+        orderLogPersistencePort.logOrderStatusChange(orderLogModel.getOrderId(),
+                orderLogModel.getChefId(),
+                orderLogModel.getCustomerId(),
+                new OrderStatusModel(
+                        orderLogModel.getStatusChanges().get(orderLogModel.getStatusChanges().size() - 1).getPreviousState(),
+                        orderLogModel.getStatusChanges().get(orderLogModel.getStatusChanges().size() - 1).getNewState(),
+                        orderLogModel.getStatusChanges().get(orderLogModel.getStatusChanges().size() - 1).getChangedAt()
+                ));
     }
 
     @Override
-    public List<OrderLogModel> getOrderLogs(Long orderId) {
+    public OrderLogModel getOrderLogs(Long orderId) {
         return orderLogPersistencePort.getOrderLogsByOrderId(orderId);
     }
 }

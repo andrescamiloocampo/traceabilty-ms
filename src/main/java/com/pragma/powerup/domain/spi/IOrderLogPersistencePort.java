@@ -1,10 +1,9 @@
 package com.pragma.powerup.domain.spi;
 
 import com.pragma.powerup.domain.model.OrderLogModel;
-
-import java.util.List;
+import com.pragma.powerup.domain.model.OrderStatusModel;
 
 public interface IOrderLogPersistencePort {
-    void logOrderStatusChange(OrderLogModel orderLogModel);
-    List<OrderLogModel> getOrderLogsByOrderId(Long orderId);
+    void logOrderStatusChange(Long orderId, Long chefId, Long customerId, OrderStatusModel orderStatusModel);
+    OrderLogModel getOrderLogsByOrderId(Long orderId);
 }
