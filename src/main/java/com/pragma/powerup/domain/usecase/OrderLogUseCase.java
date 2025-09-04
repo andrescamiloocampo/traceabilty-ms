@@ -5,7 +5,6 @@ import com.pragma.powerup.domain.model.OrderLogModel;
 import com.pragma.powerup.domain.model.OrderStatusModel;
 import com.pragma.powerup.domain.spi.IOrderLogPersistencePort;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public class OrderLogUseCase implements IOrderLogServicePort {
@@ -30,6 +29,11 @@ public class OrderLogUseCase implements IOrderLogServicePort {
 
     @Override
     public OrderLogModel getOrderLogs(Long orderId) {
-        return orderLogPersistencePort.getOrderLogsByOrderId(orderId);
+        return orderLogPersistencePort.getOrderLogByOrderId(orderId);
+    }
+
+    @Override
+    public List<OrderLogModel> getAllOrderLogs(Long customerId) {
+        return orderLogPersistencePort.getOrderLogsByCustomerId(customerId);
     }
 }

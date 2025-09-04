@@ -33,6 +33,7 @@ public class OrderLogMongoAdapter implements IOrderLogPersistencePort {
 
             log = orderLogDocumentMapper.toOrderLogDocument(newLogModel);
         } else {
+            log.setChefId(chefId);
             log.getStatusChanges().add(orderStatusDocumentMapper.toOrderStatusDocument(orderStatusModel));
         }
 
@@ -40,8 +41,13 @@ public class OrderLogMongoAdapter implements IOrderLogPersistencePort {
     }
 
     @Override
-    public OrderLogModel getOrderLogsByOrderId(Long orderId) {
+    public OrderLogModel getOrderLogByOrderId(Long orderId) {
         return orderLogDocumentMapper.toOrderLogModel(orderLogRepository.findByOrderId(orderId));
+    }
+
+    @Override
+    public List<OrderLogModel> getOrderLogsByCustomerId(Long customerId) {
+        return orderLogDocumentMapper.toOrderLogModelList(orderLogRepository.findByCustomerId(customerId));
     }
 
 

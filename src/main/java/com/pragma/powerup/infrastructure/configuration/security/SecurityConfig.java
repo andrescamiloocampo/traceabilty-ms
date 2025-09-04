@@ -26,6 +26,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .antMatchers("/api/v1/object/**").permitAll()
                         .antMatchers("/api/v1/logs/orders/**").hasAnyAuthority("CUSTOMER","EMPLOYEE","ADMIN")
+                        .antMatchers("/swagger-ui/**","/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);

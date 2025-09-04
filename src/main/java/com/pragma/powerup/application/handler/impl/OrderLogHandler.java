@@ -29,4 +29,9 @@ public class OrderLogHandler implements IOrderLogHandler {
     public OrderLogResponseDto getOrderLogs(Long orderId) {
         return orderLogResponseMapper.toResponse(orderLogServicePort.getOrderLogs(orderId));
     }
+
+    @Override
+    public List<OrderLogResponseDto> getAllOrderLogs(Long customerId) {
+        return orderLogResponseMapper.toResponseList(orderLogServicePort.getAllOrderLogs(customerId));
+    }
 }

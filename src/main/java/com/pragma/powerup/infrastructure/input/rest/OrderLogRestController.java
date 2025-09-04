@@ -8,7 +8,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/logs/orders")
@@ -16,6 +19,17 @@ import org.springframework.web.bind.annotation.*;
 public class OrderLogRestController {
 
     private final IOrderLogHandler orderLogHandler;
+
+    @Operation(summary = "Get all order logs for a customer")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Order logs retrieved successfully"),
+            @ApiResponse(responseCode = "403", description = "Access denied")
+    })
+    @GetMapping
+    public ResponseEntity<List<OrderLogResponseDto>> getAllOrderLogs(Authentication authentication) {
+        Long customerId = Long.valueOf(authentication.getPrincipal().toString());
+        return ResponseEntity.ok(orderLogHandler.getAllOrderLogs(customerId));
+    }
 
     @Operation(summary = "Log order status change")
     @ApiResponses(value = {

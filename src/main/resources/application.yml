@@ -4,7 +4,7 @@ server:
 spring:
   data:
     mongodb:
-      uri: 
+      uri: mongodb+srv://ocamporamirezandrescamilo846:1234@cluster0.8oc7vpo.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
       database: Traceability
   security:
     user:
