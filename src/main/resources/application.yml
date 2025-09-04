@@ -1,15 +1,28 @@
 server:
-  port: 8081
+  port: 8083
 
 spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/powerup
-    username: root
-    password: 1234
+  data:
+    mongodb:
+      uri: mongodb+srv://ocamporamirezandrescamilo846:1234@cluster0.8oc7vpo.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+      database: Traceability
+  security:
+    user:
+      name: root
+      password: root
 
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+
+application:
+  security:
+    jwt:
+      secret-key: DnkM6Yeq/oVtI4WHmTHqCUSpFZ4eNvPqI7xnsq1upr4=
+      expiration: 86400000
+      refresh-token:
+        expiration: 604800000
+
 appDescription: "Pragma Powerup"
 appVersion: "1.0.0"

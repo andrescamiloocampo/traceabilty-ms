@@ -4,26 +4,18 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
-@Entity
-@Table(name = "objectTable")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
+@Document(collection = "objectTable")
 public class ObjectEntity {
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Id
-    @Column(name = "object_id", nullable = false)
-    private Long id;
 
-    @Column(length = 50)
+    @Id
+    private String id;
+
     private String name;
 }
