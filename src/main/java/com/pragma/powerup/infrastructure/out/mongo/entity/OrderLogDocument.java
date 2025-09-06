@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @NoArgsConstructor
@@ -18,6 +19,10 @@ public class OrderLogDocument {
     private Long orderId;
     private Long chefId;
     private Long customerId;
+    private Long restaurantId;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private String currentState;
 
     private List<OrderStatus> statusChanges;
 }

@@ -5,14 +5,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.math.BigInteger;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderStatusModel {
-    private String previousState;
-    private String newState;
-    private LocalDateTime changedAt;
+public class OrderEfficiencyModel {
+    private Long id;
+    private Long customerId;
+    private Long chefId;
+    private String totalTime;
+    private BigInteger totalMinutes;
 }

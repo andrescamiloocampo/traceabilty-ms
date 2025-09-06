@@ -4,8 +4,11 @@ import com.pragma.powerup.domain.api.IObjectServicePort;
 import com.pragma.powerup.domain.api.IOrderLogServicePort;
 import com.pragma.powerup.domain.spi.IObjectPersistencePort;
 import com.pragma.powerup.domain.spi.IOrderLogPersistencePort;
+import com.pragma.powerup.domain.spi.IRestaurantOwnerPersistencePort;
 import com.pragma.powerup.domain.usecase.ObjectUseCase;
 import com.pragma.powerup.domain.usecase.OrderLogUseCase;
+import com.pragma.powerup.infrastructure.out.feign.adapter.RestaurantOwnerAdapter;
+import com.pragma.powerup.infrastructure.out.feign.client.PlazaFeignClient;
 import com.pragma.powerup.infrastructure.out.jpa.adapter.ObjectJpaAdapter;
 import com.pragma.powerup.infrastructure.out.jpa.mapper.IObjectEntityMapper;
 import com.pragma.powerup.infrastructure.out.jpa.repository.IObjectRepository;
@@ -25,6 +28,7 @@ public class BeanConfiguration {
     private final IOrderLogRepository orderLogRepository;
     private final IOrderLogDocumentMapper orderLogDocumentMapper;
     private final IOrderStatusDocumentMapper orderStatusDocumentMapper;
+    private final PlazaFeignClient plazaFeignClient;
 
     @Bean
     public IObjectPersistencePort objectPersistencePort() {
@@ -42,7 +46,12 @@ public class BeanConfiguration {
     }
 
     @Bean
+    public IRestaurantOwnerPersistencePort restaurantOwnerPersistencePort(){
+        return new RestaurantOwnerAdapter(plazaFeignClient);
+    }
+
+    @Bean
     public IOrderLogServicePort orderLogServicePort() {
-        return new OrderLogUseCase(orderLogPersistencePort());
+        return new OrderLogUseCase(orderLogPersistencePort(),restaurantOwnerPersistencePort());
     }
 }

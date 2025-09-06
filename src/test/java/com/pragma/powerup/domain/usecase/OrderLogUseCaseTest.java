@@ -1,15 +1,21 @@
 package com.pragma.powerup.domain.usecase;
 
+import com.pragma.powerup.domain.exception.InvalidOwnerException;
+import com.pragma.powerup.domain.model.OrderEfficiencyModel;
 import com.pragma.powerup.domain.model.OrderLogModel;
 import com.pragma.powerup.domain.model.OrderStatusModel;
 import com.pragma.powerup.domain.spi.IOrderLogPersistencePort;
+import com.pragma.powerup.domain.spi.IRestaurantOwnerPersistencePort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -17,73 +23,91 @@ import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.openMocks;
 
 class OrderLogUseCaseTest {
-    @Mock
     private IOrderLogPersistencePort orderLogPersistencePort;
-
-    @InjectMocks
-    private OrderLogUseCase orderLogUseCase;
-
-    private OrderLogModel orderLogModel;
+    private IRestaurantOwnerPersistencePort restaurantOwnerPersistencePort;
+    private OrderLogUseCase useCase;
 
     @BeforeEach
     void setUp() {
-        openMocks(this);
-
-        orderLogModel = new OrderLogModel(
-                1L,
-                101L,
-                202L,
-                List.of(new OrderStatusModel("PENDING", "PREPARATION", LocalDateTime.now()))
-        );
+        orderLogPersistencePort = mock(IOrderLogPersistencePort.class);
+        restaurantOwnerPersistencePort = mock(IRestaurantOwnerPersistencePort.class);
+        useCase = new OrderLogUseCase(orderLogPersistencePort, restaurantOwnerPersistencePort);
     }
 
     @Test
-    void logOrderStatusChange_shouldCallPersistencePort() {
-        OrderLogModel logModel = orderLogModel;
+    void shouldThrowExceptionWhenOwnershipIsInvalid() {
+        when(restaurantOwnerPersistencePort.getOwnership(1, 1)).thenReturn(false);
 
-        orderLogUseCase.logOrderStatusChange(logModel);
-
-        ArgumentCaptor<OrderStatusModel> statusCaptor = ArgumentCaptor.forClass(OrderStatusModel.class);
-
-        verify(orderLogPersistencePort, times(1)).logOrderStatusChange(
-                eq(logModel.getOrderId()),
-                eq(logModel.getChefId()),
-                eq(logModel.getCustomerId()),
-                statusCaptor.capture()
-        );
-
-        OrderStatusModel capturedStatus = statusCaptor.getValue();
-        assertEquals("PENDING", capturedStatus.getPreviousState());
-        assertEquals("PREPARATION", capturedStatus.getNewState());
-        assertNotNull(capturedStatus.getChangedAt());
+        assertThrows(InvalidOwnerException.class, () ->
+                useCase.getOrderEfficiencyByEmployee(10L, 1L, 1L));
     }
 
     @Test
-    void getOrderLogs_shouldReturnOrderLog() {
-        Long orderId = 1L;
-        when(orderLogPersistencePort.getOrderLogByOrderId(orderId)).thenReturn(orderLogModel);
+    void shouldReturnZeroWhenNoOrdersExist() {
+        when(restaurantOwnerPersistencePort.getOwnership(1, 1)).thenReturn(true);
+        when(orderLogPersistencePort.getOrdersByChefId(10L)).thenReturn(Collections.emptyList());
 
-        OrderLogModel result = orderLogUseCase.getOrderLogs(orderId);
+        OrderEfficiencyModel result = useCase.getOrderEfficiencyByEmployee(10L, 1L, 1L);
 
-        assertNotNull(result);
-        assertEquals(orderId, result.getOrderId());
-        verify(orderLogPersistencePort).getOrderLogByOrderId(orderId);
+        assertEquals(BigInteger.ZERO, result.getTotalMinutes());
+        assertEquals(10L, result.getChefId());
     }
 
     @Test
-    void getAllOrderLogs_shouldReturnAllOrderLogsForCustomer() {
-        Long customerId = 202L;
-        List<OrderLogModel> mockLogs = List.of(orderLogModel,
-                new OrderLogModel(2L, 101L, 202L, List.of(new OrderStatusModel("PREPARATION", "DONE", LocalDateTime.now())))
-        );
+    void shouldIgnoreOrdersWithNullDates() {
+        when(restaurantOwnerPersistencePort.getOwnership(1, 1)).thenReturn(true);
 
-        when(orderLogPersistencePort.getOrderLogsByCustomerId(customerId)).thenReturn(mockLogs);
+        OrderLogModel invalidOrder = new OrderLogModel();
+        invalidOrder.setCreatedAt(null);
+        invalidOrder.setUpdatedAt(null);
 
-        List<OrderLogModel> result = orderLogUseCase.getAllOrderLogs(customerId);
+        when(orderLogPersistencePort.getOrdersByChefId(10L)).thenReturn(List.of(invalidOrder));
 
-        assertNotNull(result);
-        assertEquals(2, result.size());
-        assertEquals(customerId, result.get(0).getCustomerId());
-        verify(orderLogPersistencePort).getOrderLogsByCustomerId(customerId);
+        OrderEfficiencyModel result = useCase.getOrderEfficiencyByEmployee(10L, 1L, 1L);
+
+        assertEquals(BigInteger.ZERO, result.getTotalMinutes());
+    }
+
+    @Test
+    void shouldCalculateAverageWithoutRoundingUp() {
+        when(restaurantOwnerPersistencePort.getOwnership(1, 1)).thenReturn(true);
+
+        LocalDateTime start = LocalDateTime.now().minusMinutes(10);
+        LocalDateTime end = LocalDateTime.now();
+
+        OrderLogModel order1 = new OrderLogModel();
+        order1.setCreatedAt(start);
+        order1.setUpdatedAt(end);
+
+        OrderLogModel order2 = new OrderLogModel();
+        order2.setCreatedAt(start);
+        order2.setUpdatedAt(end.minusMinutes(1));
+
+        when(orderLogPersistencePort.getOrdersByChefId(10L)).thenReturn(Arrays.asList(order1, order2));
+
+        OrderEfficiencyModel result = useCase.getOrderEfficiencyByEmployee(10L, 1L, 1L);
+
+        assertEquals(BigInteger.TEN, result.getTotalMinutes());
+    }
+
+    @Test
+    void shouldCalculateAverageWithRoundingDown() {
+        when(restaurantOwnerPersistencePort.getOwnership(1, 1)).thenReturn(true);
+
+        LocalDateTime now = LocalDateTime.now();
+
+        OrderLogModel order1 = new OrderLogModel();
+        order1.setCreatedAt(now.minusMinutes(8));
+        order1.setUpdatedAt(now);
+
+        OrderLogModel order2 = new OrderLogModel();
+        order2.setCreatedAt(now.minusMinutes(4));
+        order2.setUpdatedAt(now);
+
+        when(orderLogPersistencePort.getOrdersByChefId(10L)).thenReturn(Arrays.asList(order1, order2));
+
+        OrderEfficiencyModel result = useCase.getOrderEfficiencyByEmployee(10L, 1L, 1L);
+
+        assertEquals(BigInteger.valueOf(6), result.getTotalMinutes());
     }
 }
