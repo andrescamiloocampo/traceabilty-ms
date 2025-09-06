@@ -8,4 +8,6 @@ import java.util.List;
 public interface IOrderLogRepository extends MongoRepository<OrderLogDocument, String> {
     OrderLogDocument findByOrderId(Long orderId);
     List<OrderLogDocument> findByCustomerId(Long customerId);
+    List<OrderLogDocument> findByRestaurantIdAndCurrentState(Long restaurantId, String state);
+    List<OrderLogDocument> findByChefId(Long chefId);
 }
