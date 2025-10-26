@@ -20,6 +20,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/logs/orders")
 @RequiredArgsConstructor
+@CrossOrigin("*")
 public class OrderLogRestController {
 
     private final IOrderLogHandler orderLogHandler;
